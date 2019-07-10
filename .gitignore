@@ -1,0 +1,13 @@
+node_modules
+
+*.DS_Store
+
+env/
+venv/
+output/
+plots/
+datasets/
+results/
+
+.nyc_output/
+coverage/
