@@ -33,8 +33,8 @@ describe('Insertions', () => {
         expect(root.getMax()).to.equal(41);
         expect(root.getMinKey()).to.equal(2);
         expect(root.getChildren().length).to.equal(4);
-        expect(root.getLeftSibling()).to.be.null;
-        expect(root.getRightSibling()).to.be.null;
+        expect(root.findLeftSibling()).to.be.null;
+        expect(root.findRightSibling()).to.be.null;
         expect(root.getParent()).to.be.null;
         expect(root.isRoot()).to.be.true;
 
@@ -46,8 +46,8 @@ describe('Insertions', () => {
         expect(child0.getMinKey()).to.equal(2);
         expect(child0.getChildren().length).to.equal(4);
         expect(child0.getChildren()[0]).to.be.instanceOf(Interval);
-        expect(child0.getLeftSibling()).to.be.null;
-        expect(child0.getRightSibling()).to.equal(child1);
+        expect(child0.findLeftSibling()).to.be.null;
+        expect(child0.findRightSibling()).to.equal(child1);
         expect(child0.getParent()).to.equal(root);
         expect(child0.isRoot()).to.be.false;
 
@@ -57,8 +57,8 @@ describe('Insertions', () => {
         expect(child1.getMinKey()).to.equal(10);
         expect(child1.getChildren().length).to.equal(4);
         expect(child1.getChildren()[0]).to.be.instanceOf(Interval);
-        expect(child1.getLeftSibling()).to.equal(child0);
-        expect(child1.getRightSibling()).to.equal(child2);
+        expect(child1.findLeftSibling()).to.equal(child0);
+        expect(child1.findRightSibling()).to.equal(child2);
         expect(child1.getParent()).to.equal(root);
         expect(child1.isRoot()).to.be.false;
 
@@ -68,8 +68,8 @@ describe('Insertions', () => {
         expect(child2.getMinKey()).to.equal(20);
         expect(child2.getChildren().length).to.equal(3);
         expect(child2.getChildren()[0]).to.be.instanceOf(Interval);
-        expect(child2.getLeftSibling()).to.equal(child1);
-        expect(child2.getRightSibling()).to.equal(child3);
+        expect(child2.findLeftSibling()).to.equal(child1);
+        expect(child2.findRightSibling()).to.equal(child3);
         expect(child2.getParent()).to.equal(root);
         expect(child2.isRoot()).to.be.false;
 
@@ -79,8 +79,8 @@ describe('Insertions', () => {
         expect(child3.getMinKey()).to.equal(26);
         expect(child3.getChildren().length).to.equal(2);
         expect(child3.getChildren()[0]).to.be.instanceOf(Interval);
-        expect(child3.getLeftSibling()).to.equal(child2);
-        expect(child3.getRightSibling()).to.be.null;
+        expect(child3.findLeftSibling()).to.equal(child2);
+        expect(child3.findRightSibling()).to.be.null;
         expect(child3.getParent()).to.equal(root);
         expect(child3.isRoot()).to.be.false;
     });
@@ -106,8 +106,8 @@ describe('Insertions', () => {
         expect(root.getMax()).to.equal(31);
         expect(root.getMinKey()).to.equal(2);
         expect(root.getChildren().length).to.equal(2);
-        expect(root.getLeftSibling()).to.be.null;
-        expect(root.getRightSibling()).to.be.null;
+        expect(root.findLeftSibling()).to.be.null;
+        expect(root.findRightSibling()).to.be.null;
         expect(root.getParent()).to.be.null;
         expect(root.isRoot()).to.be.true;
 
@@ -119,8 +119,8 @@ describe('Insertions', () => {
         expect(child0.getMinKey()).to.equal(2);
         expect(child0.getChildren().length).to.equal(2);
         expect(child0.getChildren()[0]).to.be.instanceOf(IBplusInternalNode);
-        expect(child0.getLeftSibling()).to.be.null;
-        expect(child0.getRightSibling()).to.equal(child1);
+        expect(child0.findLeftSibling()).to.be.null;
+        expect(child0.findRightSibling()).to.equal(child1);
         expect(child0.getParent()).to.equal(root);
         expect(child0.isRoot()).to.be.false;
 
@@ -130,8 +130,8 @@ describe('Insertions', () => {
         expect(child1.getMinKey()).to.equal(26);
         expect(child1.getChildren().length).to.equal(1);
         expect(child1.getChildren()[0]).to.be.instanceOf(IBplusInternalNode);
-        expect(child1.getLeftSibling()).to.equal(child0);
-        expect(child1.getRightSibling()).to.be.null;
+        expect(child1.findLeftSibling()).to.equal(child0);
+        expect(child1.findRightSibling()).to.be.null;
         expect(child1.getParent()).to.equal(root);
         expect(child1.isRoot()).to.be.false;
 
@@ -144,8 +144,8 @@ describe('Insertions', () => {
         expect(child00.getMinKey()).to.equal(2);
         expect(child00.getChildren().length).to.equal(2);
         expect(child00.getChildren()[0]).to.be.instanceOf(IBplusLeafNode);
-        expect(child00.getLeftSibling()).to.equal(null);
-        expect(child00.getRightSibling()).to.equal(child01);
+        expect(child00.findLeftSibling()).to.equal(null);
+        expect(child00.findRightSibling()).to.equal(child01);
         expect(child00.getParent()).to.equal(child0);
         expect(child00.isRoot()).to.be.false;
 
@@ -155,8 +155,8 @@ describe('Insertions', () => {
         expect(child01.getMinKey()).to.equal(6);
         expect(child01.getChildren().length).to.equal(2);
         expect(child01.getChildren()[0]).to.be.instanceOf(IBplusLeafNode);
-        expect(child01.getLeftSibling()).to.equal(child00);
-        expect(child01.getRightSibling()).to.equal(child10);
+        expect(child01.findLeftSibling()).to.equal(child00);
+        expect(child01.findRightSibling()).to.equal(child10);
         expect(child01.getParent()).to.equal(child0);
         expect(child01.isRoot()).to.be.false;
 
@@ -166,8 +166,8 @@ describe('Insertions', () => {
         expect(child10.getMinKey()).to.equal(26);
         expect(child10.getChildren().length).to.equal(1);
         expect(child10.getChildren()[0]).to.be.instanceOf(IBplusLeafNode);
-        expect(child10.getLeftSibling()).to.equal(child01);
-        expect(child10.getRightSibling()).to.be.null;
+        expect(child10.findLeftSibling()).to.equal(child01);
+        expect(child10.findRightSibling()).to.be.null;
         expect(child10.getParent()).to.equal(child1);
         expect(child10.isRoot()).to.be.false;
 
@@ -181,8 +181,8 @@ describe('Insertions', () => {
         expect(child000.getMinKey()).to.equal(2);
         expect(child000.getChildren().length).to.equal(2);
         expect(child000.getChildren()[0]).to.be.instanceOf(Interval);
-        expect(child000.getLeftSibling()).to.be.null;
-        expect(child000.getRightSibling()).to.equal(child001);
+        expect(child000.findLeftSibling()).to.be.null;
+        expect(child000.findRightSibling()).to.equal(child001);
         expect(child000.getParent()).to.equal(child00);
         expect(child000.isRoot()).to.be.false;
 
@@ -192,8 +192,8 @@ describe('Insertions', () => {
         expect(child001.getMinKey()).to.equal(4);
         expect(child001.getChildren().length).to.equal(1);
         expect(child001.getChildren()[0]).to.be.instanceOf(Interval);
-        expect(child001.getLeftSibling()).to.equal(child000);
-        expect(child001.getRightSibling()).to.equal(child010);
+        expect(child001.findLeftSibling()).to.equal(child000);
+        expect(child001.findRightSibling()).to.equal(child010);
         expect(child001.getParent()).to.equal(child00);
         expect(child001.isRoot()).to.be.false;
 
@@ -203,8 +203,8 @@ describe('Insertions', () => {
         expect(child010.getMinKey()).to.equal(6);
         expect(child010.getChildren().length).to.equal(1);
         expect(child010.getChildren()[0]).to.be.instanceOf(Interval);
-        expect(child010.getLeftSibling()).to.equal(child001);
-        expect(child010.getRightSibling()).to.equal(child011);
+        expect(child010.findLeftSibling()).to.equal(child001);
+        expect(child010.findRightSibling()).to.equal(child011);
         expect(child010.getParent()).to.equal(child01);
         expect(child010.isRoot()).to.be.false;
 
@@ -214,8 +214,8 @@ describe('Insertions', () => {
         expect(child011.getMinKey()).to.equal(10);
         expect(child011.getChildren().length).to.equal(2);
         expect(child011.getChildren()[0]).to.be.instanceOf(Interval);
-        expect(child011.getLeftSibling()).to.equal(child010);
-        expect(child011.getRightSibling()).to.equal(child100);
+        expect(child011.findLeftSibling()).to.equal(child010);
+        expect(child011.findRightSibling()).to.equal(child100);
         expect(child011.getParent()).to.equal(child01);
         expect(child011.isRoot()).to.be.false;
 
@@ -225,8 +225,8 @@ describe('Insertions', () => {
         expect(child100.getMinKey()).to.equal(26);
         expect(child100.getChildren().length).to.equal(1);
         expect(child100.getChildren()[0]).to.be.instanceOf(Interval);
-        expect(child100.getLeftSibling()).to.equal(child011);
-        expect(child100.getRightSibling()).to.be.null;
+        expect(child100.findLeftSibling()).to.equal(child011);
+        expect(child100.findRightSibling()).to.be.null;
         expect(child100.getParent()).to.equal(child10);
         expect(child100.isRoot()).to.be.false;
     });
