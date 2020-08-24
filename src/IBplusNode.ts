@@ -83,14 +83,14 @@ export abstract class IBplusNode<T extends FlatInterval> {
             if (idxInParent >= 1)
                 return this.parent.getChildren()[idxInParent - 1].findLeftSiblingAux(currentDepth, !isAscending);
             else
-                return this.parent.findLeftSiblingAux(currentDepth++, isAscending);
+                return this.parent.findLeftSiblingAux(currentDepth + 1, isAscending);
         } else {
             // If is descending find the right most node at the same depth
             if (currentDepth == 0)
                 return this;
             else {
                 let children = this.getChildren();
-                return children[children.length - 1].findLeftSiblingAux(currentDepth--, isAscending);
+                return children[children.length - 1].findLeftSiblingAux(currentDepth - 1, isAscending);
             }
         }
     }

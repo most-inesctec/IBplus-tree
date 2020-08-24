@@ -29,17 +29,17 @@ export class IBplusInternalNode<T extends FlatInterval> extends IBplusNode<T> {
             if (idxInParent == null)
                 return null;
 
-            if (idxInParent < this.parent.getChildren.length - 1)
+            if (idxInParent < this.parent.getChildren().length - 1)
                 return (<IBplusInternalNode<T>>this.parent.getChildren()[idxInParent + 1]).findRightSiblingAux(currentDepth, !isAscending);
             else
-                return this.parent.findRightSiblingAux(currentDepth++, isAscending);
+                return this.parent.findRightSiblingAux(currentDepth + 1, isAscending);
         } else {
             // If is descending find the right most node at the same depth
             if (currentDepth == 0)
                 return this;
             else {
                 let children = this.getChildren();
-                return (<IBplusInternalNode<T>>children[children.length - 1]).findRightSiblingAux(currentDepth--, isAscending);
+                return (<IBplusInternalNode<T>>children[children.length - 1]).findRightSiblingAux(currentDepth - 1, isAscending);
             }
         }
     }
@@ -261,8 +261,8 @@ export class IBplusInternalNode<T extends FlatInterval> extends IBplusNode<T> {
 
             let childIdx: number = leaf.getChildren().indexOf(int);
             if (childIdx < 0) {
-                let leftSibling: IBplusNode<T> = this.findLeftSibling();
-                let rightSibling: IBplusNode<T> = this.findRightSibling();
+                let leftSibling: IBplusNode<T> = leaf.findLeftSibling();
+                let rightSibling: IBplusNode<T> = leaf.findRightSibling();
 
                 // Previous removals triggered borrows that moved the child
                 if (leftSibling && int.getLowerBound() <= leaf.getMinKey())
