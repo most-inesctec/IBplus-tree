@@ -10,10 +10,6 @@ import {
  */
 export abstract class IBplusNode<T extends FlatInterval> {
 
-    private rightSibling: IBplusNode<T> = null;
-
-    private leftSibling: IBplusNode<T> = null;
-
     /**
      * @param order Node's order. Must be the same in all tree nodes.
      * @param parent This node's parent node. If null, node is root
@@ -62,45 +58,10 @@ export abstract class IBplusNode<T extends FlatInterval> {
         return Math.max(...this.maximums)
     }
 
-    /**
-     * Gets this node right sibling.
-     */
-    getRightSibling(): IBplusNode<T> {
-        return this.rightSibling;
-    }
+    abstract findRightSibling(): IBplusNode<T> | null;
 
-    /**
-     * Sets this node right sibling to the given value.
-     * 
-     * @param sibling new right sibling
-     */
-    setRightSibling(sibling: IBplusNode<T>): void {
-        this.rightSibling = sibling;
-    }
-
-    /**
-     * Gets this node left sibling.
-     */
-    getLeftSibling(): IBplusNode<T> {
-        return this.leftSibling;
-    }
-
-    /**
-     * Sets this node left sibling to the given value.
-     * 
-     * @param sibling new left sibling
-     */
-    setLeftSibling(sibling: IBplusNode<T>): void {
-        this.leftSibling = sibling;
-    }
-
-    /**
-     * Function to be called on node deletion.
-     * Sets this node siblings' siblings to one each other, making this node no one's sibling
-     */
-    protected concatSiblings() {
-        if (this.rightSibling !== null) this.rightSibling.setLeftSibling(this.leftSibling);
-        if (this.leftSibling !== null) this.leftSibling.setRightSibling(this.rightSibling);
+    findLeftSibling(): IBplusNode<T> | null {
+        return null;
     }
 
     /**
@@ -287,7 +248,6 @@ export abstract class IBplusNode<T extends FlatInterval> {
         this.setSubstitutionNode(sibling);
         this.setChildrenParentOnMerge(sibling);
 
-        this.concatSiblings();
         this.parent.removeChild(this.parent.getChildren().indexOf(this));
 
         if (!sibling.isRoot())
@@ -300,22 +260,24 @@ export abstract class IBplusNode<T extends FlatInterval> {
     protected handleUnderflow() {
         // Minimum number of entries a node must have
         let minEntries: number = Math.floor(this.order / 2);
+        let leftSibling: IBplusNode<T> = this.findLeftSibling();
+        let rightSibling: IBplusNode<T> = this.findRightSibling();
 
         // Borrow from left sibling
-        if (this.leftSibling != null && this.leftSibling.keys.length > minEntries)
-            this.borrow(this.leftSibling, 0, this.leftSibling.keys.length - 1);
+        if (leftSibling != null && leftSibling.keys.length > minEntries)
+            this.borrow(leftSibling, 0, leftSibling.keys.length - 1);
 
         //Borrow from right sibling
-        else if (this.rightSibling != null && this.rightSibling.keys.length > minEntries)
-            this.borrow(this.rightSibling, this.keys.length, 0);
+        else if (rightSibling != null && rightSibling.keys.length > minEntries)
+            this.borrow(rightSibling, this.keys.length, 0);
 
         // Merge left sibling
-        else if (this.leftSibling != null)
-            this.merge(this.leftSibling, this.leftSibling.keys.length);
+        else if (leftSibling != null)
+            this.merge(leftSibling, leftSibling.keys.length);
 
         // Merge right sibling
-        else if (this.rightSibling != null)
-            this.merge(this.rightSibling, 0);
+        else if (rightSibling != null)
+            this.merge(rightSibling, 0);
     }
 
     /**

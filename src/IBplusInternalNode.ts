@@ -21,6 +21,10 @@ export class IBplusInternalNode<T extends FlatInterval> extends IBplusNode<T> {
         this.children = children;
     }
 
+    findRightSibling(): IBplusNode<T> {
+        throw new Error("Method not implemented.");
+    }
+
     /**
      * Updates the current node structures, when a new maximum appears in a child node.
      * 
@@ -167,12 +171,6 @@ export class IBplusInternalNode<T extends FlatInterval> extends IBplusNode<T> {
             this.maximums.splice(divIdx, sibSize),
             this.children.splice(divIdx, sibSize)
         );
-        let rs: IBplusNode<T> = this.getRightSibling();
-        if (rs != null) rs.setLeftSibling(sibling);
-        sibling.setRightSibling(rs);
-
-        sibling.setLeftSibling(this);
-        this.setRightSibling(sibling);
 
         this.parent.updateWithNewNode(this, sibling);
 
@@ -239,16 +237,20 @@ export class IBplusInternalNode<T extends FlatInterval> extends IBplusNode<T> {
             }
 
             let childIdx: number = leaf.getChildren().indexOf(int);
-            if (childIdx < 0)
+            if (childIdx < 0) {
+                let leftSibling: IBplusNode<T> = this.findLeftSibling();
+                let rightSibling: IBplusNode<T> = this.findRightSibling();
+
                 // Previous removals triggered borrows that moved the child
-                if (leaf.getLeftSibling() && int.getLowerBound() <= leaf.getMinKey())
+                if (leftSibling && int.getLowerBound() <= leaf.getMinKey())
                     // Sent to left sibling leaf
-                    leaf = <IBplusLeafNode<T>>leaf.getLeftSibling();
-                else if (leaf.getRightSibling() && int.getLowerBound() > leaf.getMinKey())
+                    leaf = <IBplusLeafNode<T>>leftSibling;
+                else if (rightSibling && int.getLowerBound() > leaf.getMinKey())
                     // Sent to right sibling leaf
-                    leaf = <IBplusLeafNode<T>>leaf.getRightSibling();
+                    leaf = <IBplusLeafNode<T>>rightSibling;
                 else
                     throw Error('Unable to find child in range remove.');
+            }
 
             leaf.removeChild(leaf.getChildren().indexOf(int));
         }
@@ -273,8 +275,8 @@ export class IBplusInternalNode<T extends FlatInterval> extends IBplusNode<T> {
             return false;
 
         return this.children[0] instanceof IBplusInternalNode &&
-            this.children[0].getLeftSibling() == null &&
-            this.children[0].getRightSibling() == null;
+            this.children[0].findLeftSibling() == null &&
+            this.children[0].findRightSibling() == null;
     }
 
 

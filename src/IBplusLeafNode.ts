@@ -14,6 +14,11 @@ export class IBplusLeafNode<T extends FlatInterval> extends IBplusNode<T> {
      */
     private substSibling: IBplusLeafNode<T> = null;
 
+    /**
+     * This node rightSibling.
+     */
+    private rightSibling: IBplusLeafNode<T> = null;
+
     constructor(order: number = 4,
         parent: IBplusInternalNode<T> = null,
         keys: Array<number> = [],
@@ -24,6 +29,10 @@ export class IBplusLeafNode<T extends FlatInterval> extends IBplusNode<T> {
 
     getChildren(): Array<Interval<T>> {
         return this.children;
+    }
+
+    findRightSibling(): IBplusLeafNode<T> {
+        return this.rightSibling;
     }
 
     /**
@@ -117,12 +126,9 @@ export class IBplusLeafNode<T extends FlatInterval> extends IBplusNode<T> {
             this.maximums.splice(divIdx, sibSize),
             this.children.splice(divIdx, sibSize)
         );
-        let rs: IBplusNode<T> = this.getRightSibling();
-        if (rs != null) rs.setLeftSibling(sibling);
-        sibling.setRightSibling(rs);
 
-        sibling.setLeftSibling(this);
-        this.setRightSibling(sibling);
+        sibling.rightSibling = this.rightSibling;
+        this.rightSibling = sibling;
 
         this.parent.updateWithNewNode(this, sibling);
 
@@ -183,7 +189,7 @@ export class IBplusLeafNode<T extends FlatInterval> extends IBplusNode<T> {
         // Array containing the Intervals that will need to be inserted in the end (time split intervals)
         let newInsertions: Array<Interval<T>> = [];
 
-        if (this.getRightSibling() != null) {
+        if (this.rightSibling != null) {
             let splitIdx: number = this.pickSplitPoint(alpha);
 
             if (this.maximums[splitIdx] == this.getMax())
