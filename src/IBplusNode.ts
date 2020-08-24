@@ -58,10 +58,45 @@ export abstract class IBplusNode<T extends FlatInterval> {
         return Math.max(...this.maximums)
     }
 
+    protected findIndexInParent(): number | null {
+        if (this.parent != null) {
+            let children: IBplusNode<T>[] = this.parent.getChildren();
+
+            for (let i = 0; i < children.length; ++i)
+                if (children[i] == this)
+                    return i;
+        }
+
+        return null;
+    }
+
     abstract findRightSibling(): IBplusNode<T> | null;
 
+    private findLeftSiblingAux(currentDepth: number, isAscending: boolean): IBplusNode<T> | null {
+        if (isAscending) {
+            // If is ascending set find a parent that has a left sibling
+            let idxInParent: number = this.findIndexInParent();
+            // No parent, so no left sibling
+            if (idxInParent == null)
+                return null;
+
+            if (idxInParent >= 1)
+                return this.parent.getChildren()[idxInParent - 1].findLeftSiblingAux(currentDepth, !isAscending);
+            else
+                return this.parent.findLeftSiblingAux(currentDepth++, isAscending);
+        } else {
+            // If is descending find the right most node at the same depth
+            if (currentDepth == 0)
+                return this;
+            else {
+                let children = this.getChildren();
+                return children[children.length - 1].findLeftSiblingAux(currentDepth--, isAscending);
+            }
+        }
+    }
+
     findLeftSibling(): IBplusNode<T> | null {
-        return null;
+        return this.findLeftSiblingAux(0, true);
     }
 
     /**

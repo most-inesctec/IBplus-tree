@@ -21,8 +21,31 @@ export class IBplusInternalNode<T extends FlatInterval> extends IBplusNode<T> {
         this.children = children;
     }
 
-    findRightSibling(): IBplusNode<T> {
-        throw new Error("Method not implemented.");
+    private findRightSiblingAux(currentDepth: number, isAscending: boolean): IBplusNode<T> | null {
+        if (isAscending) {
+            // If is ascending set find a parent that has a right sibling
+            let idxInParent: number = this.findIndexInParent();
+            // No parent, so no right sibling
+            if (idxInParent == null)
+                return null;
+
+            if (idxInParent < this.parent.getChildren.length - 1)
+                return (<IBplusInternalNode<T>>this.parent.getChildren()[idxInParent + 1]).findRightSiblingAux(currentDepth, !isAscending);
+            else
+                return this.parent.findRightSiblingAux(currentDepth++, isAscending);
+        } else {
+            // If is descending find the right most node at the same depth
+            if (currentDepth == 0)
+                return this;
+            else {
+                let children = this.getChildren();
+                return (<IBplusInternalNode<T>>children[children.length - 1]).findRightSiblingAux(currentDepth--, isAscending);
+            }
+        }
+    }
+
+    findRightSibling(): IBplusNode<T> | null {
+        return this.findRightSiblingAux(0, true);
     }
 
     /**
