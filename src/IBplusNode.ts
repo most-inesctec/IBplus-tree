@@ -100,6 +100,12 @@ export abstract class IBplusNode<T extends FlatInterval> {
     }
 
     /**
+     * Function to be called on node deletion.
+     * Sets this node siblings' siblings to one each other, making this node no one's sibling
+     */
+    protected abstract concatSiblings();
+
+    /**
      * Checks if this node is the root.
      * 
      * @returns true if this node is Root, false otherwise.
@@ -283,6 +289,7 @@ export abstract class IBplusNode<T extends FlatInterval> {
         this.setSubstitutionNode(sibling);
         this.setChildrenParentOnMerge(sibling);
 
+        this.concatSiblings();
         this.parent.removeChild(this.parent.getChildren().indexOf(this));
 
         if (!sibling.isRoot())

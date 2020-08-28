@@ -35,6 +35,12 @@ export class IBplusLeafNode<T extends FlatInterval> extends IBplusNode<T> {
         return this.rightSibling;
     }
 
+    protected concatSiblings() {
+        const leftSibling = this.findLeftSibling();
+        if (leftSibling != null)
+            (<IBplusLeafNode<T>>leftSibling).rightSibling = this.rightSibling;
+    }
+
     /**
      * Recursively get the node currently replacing this node.
      * 

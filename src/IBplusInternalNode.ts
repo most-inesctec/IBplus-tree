@@ -48,6 +48,10 @@ export class IBplusInternalNode<T extends FlatInterval> extends IBplusNode<T> {
         return this.findRightSiblingAux(0, true);
     }
 
+    protected concatSiblings() {
+        // Template method - Do nothing
+    }
+
     /**
      * Updates the current node structures, when a new maximum appears in a child node.
      * 
@@ -249,7 +253,6 @@ export class IBplusInternalNode<T extends FlatInterval> extends IBplusNode<T> {
             this.findIntervalsInRange(
                 new FlatInterval(lowerBound, upperBound)
             );
-
 
         for (let [leaf, int] of foundInts) {
             // Recursively get the leaf currently substituting this leaf
