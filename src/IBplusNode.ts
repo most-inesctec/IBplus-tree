@@ -18,7 +18,7 @@ export abstract class IBplusNode<T extends FlatInterval> {
      */
     constructor(public readonly order: number,
         protected parent: IBplusInternalNode<T>,
-        protected keys: Array<number>,
+        public keys: Array<number>,
         protected maximums: Array<number>) { }
 
     /**
@@ -96,7 +96,21 @@ export abstract class IBplusNode<T extends FlatInterval> {
     }
 
     findLeftSibling(): IBplusNode<T> | null {
-        return this.findLeftSiblingAux(0, true);
+        let test = this.findLeftSiblingAux(0, true);
+
+        if (test instanceof IBplusLeafNode) {
+            let leftSibling = <IBplusLeafNode<T>>test;
+
+            if (leftSibling != null && leftSibling.substSibling != null)
+                console.log("HERE IS the MIGHTY FUCK UP")
+
+            if (leftSibling != null && leftSibling.rightSibling != (<IBplusLeafNode<T>><unknown>this)) {
+                console.log("HERE IS ANOTHER MIGHTY FUCK UP")
+                this.findLeftSiblingAux(0, true);
+            }
+        }
+
+        return test;
     }
 
     /**
@@ -174,7 +188,7 @@ export abstract class IBplusNode<T extends FlatInterval> {
     /**
      * Update the key and the maximum representing a node in its parent
      */
-    protected updateParentValues() {
+    public updateParentValues() {
         this.parent.updateMin(this);
         this.parent.updateMax(this);
     }
@@ -189,6 +203,14 @@ export abstract class IBplusNode<T extends FlatInterval> {
      * @param alpha the value of alpha used in the PickSplitPoint algorithm. If alpha <= 0, time splits aren't used.
     */
     insert(int: Interval<T>, alpha: number): void {
+        // Insertions must always start in the root -> Valid since this function is not recursive
+        if (!this.isRoot())
+            return this.parent.insert(int, alpha);
+
+        if (!this.isRoot()) {
+            console.log("ANOTHER GG")
+        }
+
         // Perform a search to determine what leaf the new record should go into.
         let insertionNode: IBplusLeafNode<T> = this.findInsertNode(int);
 
@@ -200,6 +222,7 @@ export abstract class IBplusNode<T extends FlatInterval> {
 
         // If we are adding and the keys's size is already equal to order, split before insertion
         if (insertionNode.keys.length >= this.order)
+            // Split also inserts
             insertionNode = insertionNode.split(int);
         else
             insertionNode.addInterval(int);
@@ -255,6 +278,20 @@ export abstract class IBplusNode<T extends FlatInterval> {
 
         this.setChildParentOnBorrow(sibling.getChildren().splice(removeId, 1)[0], insertId);
 
+        let rs = this.findRightSibling();
+        if (rs && rs.keys[0] < this.keys[this.keys.length - 1]) {
+            console.log("PQP")
+        }
+
+        let lf = this.findLeftSibling();
+        if (lf && lf.keys[lf.keys.length - 1] > this.keys[0]) {
+            console.log("PQP")
+        }
+
+        if (lf !== sibling && rs !== sibling) {
+            console.log("WHAT IS THIS SIBLING");
+        }
+
         this.updateParentValues();
         sibling.updateParentValues();
     }
@@ -292,6 +329,16 @@ export abstract class IBplusNode<T extends FlatInterval> {
         this.concatSiblings();
         this.parent.removeChild(this.parent.getChildren().indexOf(this));
 
+        let test = sibling.findRightSibling();
+        if (test && test.keys[0] < sibling.keys[sibling.keys.length - 1]) {
+            console.log("PQP")
+        }
+
+        test = sibling.findLeftSibling();
+        if (test && test.keys[test.keys.length - 1] > sibling.keys[0]) {
+            console.log("PQP")
+        }
+
         if (!sibling.isRoot())
             sibling.updateParentValues();
     }
@@ -306,20 +353,40 @@ export abstract class IBplusNode<T extends FlatInterval> {
         let rightSibling: IBplusNode<T> = this.findRightSibling();
 
         // Borrow from left sibling
-        if (leftSibling != null && leftSibling.keys.length > minEntries)
+        if (leftSibling != null && leftSibling.keys.length > minEntries) {
+            if (leftSibling.keys[leftSibling.keys.length - 1] > this.keys[0]) {
+                console.log("FUCKED LEFT BORROWING")
+                this.findLeftSibling();
+            }
             this.borrow(leftSibling, 0, leftSibling.keys.length - 1);
+        }
 
         //Borrow from right sibling
-        else if (rightSibling != null && rightSibling.keys.length > minEntries)
+        else if (rightSibling != null && rightSibling.keys.length > minEntries) {
+            if (rightSibling.keys[0] < this.keys[this.keys.length - 1]) {
+                console.log("FUCKED RIGHT BORROWING")
+                this.findRightSibling();
+            }
             this.borrow(rightSibling, this.keys.length, 0);
+        }
 
         // Merge left sibling
-        else if (leftSibling != null)
+        else if (leftSibling != null) {
+            if (leftSibling.keys[leftSibling.keys.length - 1] > this.keys[0]) {
+                console.log("FUCKED LEFT MERGING")
+                this.findLeftSibling();
+            }
             this.merge(leftSibling, leftSibling.keys.length);
+        }
 
         // Merge right sibling
-        else if (rightSibling != null)
+        else if (rightSibling != null) {
+            if (rightSibling.keys[0] < this.keys[this.keys.length - 1]) {
+                console.log("FUCKED RIGHT MERGING")
+                this.findRightSibling();
+            }
             this.merge(rightSibling, 0);
+        }
     }
 
     /**
