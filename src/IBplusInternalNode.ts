@@ -43,14 +43,7 @@ export class IBplusInternalNode<T extends FlatInterval> extends IBplusNode<T> {
     }
 
     findRightSibling(): IBplusNode<T> | null {
-        let test = this.findRightSiblingAux(0, true);
-
-        if (test != null && test.findLeftSibling() != this) {
-            console.log("GGGGG")
-            this.findRightSiblingAux(0, true);
-        }
-
-        return test;
+        return this.findRightSiblingAux(0, true);
     }
 
     protected concatSiblings() {
@@ -177,9 +170,6 @@ export class IBplusInternalNode<T extends FlatInterval> extends IBplusNode<T> {
         this.keys.splice(originalIdx + 1, 0, newNode.getMinKey());
         this.maximums.splice(originalIdx + 1, 0, newNode.getMax());
 
-        // if (!this.isRoot()) // Not sure if needed
-        //     this.updateParentValues();
-
         // Might be momentarily violating B+-trees order invariant
         if (this.keys.length > this.order)
             this.split();
@@ -276,10 +266,6 @@ export class IBplusInternalNode<T extends FlatInterval> extends IBplusNode<T> {
                 let leftSibling: IBplusNode<T> = leaf.findLeftSibling();
                 let rightSibling: IBplusNode<T> = leaf.findRightSibling();
 
-                if ((leftSibling != null && (<IBplusLeafNode<T>>leftSibling).substSibling != null) ||
-                    (leftSibling != null && (<IBplusLeafNode<T>>leftSibling).substSibling != null))
-                    console.log("MOTHERFUCKER")
-
                 // Previous removals triggered borrows that moved the child
                 if (leftSibling && int.getLowerBound() <= leaf.getMinKey())
                     // Sent to left sibling leaf
@@ -303,9 +289,6 @@ export class IBplusInternalNode<T extends FlatInterval> extends IBplusNode<T> {
     protected setChildParentOnBorrow(newChild: IBplusNode<T>, insertId: number): void {
         this.children.splice(insertId, 0, newChild);
         newChild.setParent(this);
-
-        if (newChild.findRightSibling().getMinKey() < newChild.keys[newChild.getChildren().length - 1])
-            console.log("XAUSS")
     }
 
     protected setChildrenParentOnMerge(newParent: IBplusInternalNode<T>): void {
