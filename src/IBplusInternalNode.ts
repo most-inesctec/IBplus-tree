@@ -37,10 +37,8 @@ export class IBplusInternalNode<T extends FlatInterval> extends IBplusNode<T> {
             // If is descending find the right most node at the same depth
             if (currentDepth == 0)
                 return this;
-            else {
-                let children = this.getChildren();
-                return (<IBplusInternalNode<T>>children[children.length - 1]).findRightSiblingAux(currentDepth - 1, isAscending);
-            }
+            else
+                return (<IBplusInternalNode<T>>this.getChildren()[0]).findRightSiblingAux(currentDepth - 1, isAscending);
         }
     }
 
@@ -49,7 +47,7 @@ export class IBplusInternalNode<T extends FlatInterval> extends IBplusNode<T> {
     }
 
     protected concatSiblings() {
-        // Template method - Do nothing
+        // Template method - Do nothing as this node has no sibling pointers
     }
 
     /**
@@ -63,7 +61,7 @@ export class IBplusInternalNode<T extends FlatInterval> extends IBplusNode<T> {
 
         this.maximums[this.children.indexOf(node)] = newMax;
 
-        if (newMax > prevMax && !this.isRoot())
+        if (!this.isRoot() && (newMax > prevMax || this.getMax() != prevMax))
             this.parent.updateMax(this);
     }
 
@@ -75,10 +73,11 @@ export class IBplusInternalNode<T extends FlatInterval> extends IBplusNode<T> {
     updateMin(node: IBplusNode<T>): void {
         let newMin: number = node.getMinKey();
         let prevMin: number = this.getMinKey();
+        let index: number = this.children.indexOf(node);
 
-        this.keys[this.children.indexOf(node)] = newMin;
+        this.keys[index] = newMin;
 
-        if (newMin < prevMin && !this.isRoot())
+        if (!this.isRoot() && (newMin < prevMin || index == 0))
             this.parent.updateMin(this);
     }
 
@@ -157,7 +156,7 @@ export class IBplusInternalNode<T extends FlatInterval> extends IBplusNode<T> {
     }
 
     /**
-     * When a split ocurred in a child of this node, the node structures must be updated.
+     * When a split occurred in a child of this node, the node structures must be updated.
      * Updates maximum and key of previous node and adds the newly created node to this node children.
      * 
      * @param original The node that was split
@@ -256,13 +255,13 @@ export class IBplusInternalNode<T extends FlatInterval> extends IBplusNode<T> {
 
         for (let [leaf, int] of foundInts) {
             // Recursively get the leaf currently substituting this leaf
-            let sibling: IBplusLeafNode<T> = leaf.getSubstituteSibling();
-            while (sibling) {
-                leaf = sibling;
-                sibling = sibling.getSubstituteSibling();
-            }
+            leaf = leaf.getSubstituteSibling();
 
-            let childIdx: number = leaf.getChildren().indexOf(int);
+            let childIdx: number = -1;
+            for (let i = 0; i < leaf.getChildren().length; ++i)
+                if (int.equals(leaf.getChildren()[i]))
+                    childIdx = i;
+
             if (childIdx < 0) {
                 let leftSibling: IBplusNode<T> = leaf.findLeftSibling();
                 let rightSibling: IBplusNode<T> = leaf.findRightSibling();
@@ -276,9 +275,14 @@ export class IBplusInternalNode<T extends FlatInterval> extends IBplusNode<T> {
                     leaf = <IBplusLeafNode<T>>rightSibling;
                 else
                     throw Error('Unable to find child in range remove.');
+
+                // Finding index of children in sibling child
+                for (let i = 0; i < leaf.getChildren().length; ++i)
+                    if (int.equals(leaf.getChildren()[i]))
+                        childIdx = i;
             }
 
-            leaf.removeChild(leaf.getChildren().indexOf(int));
+            leaf.removeChild(childIdx);
         }
     }
 

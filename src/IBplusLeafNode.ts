@@ -32,13 +32,14 @@ export class IBplusLeafNode<T extends FlatInterval> extends IBplusNode<T> {
     }
 
     findRightSibling(): IBplusLeafNode<T> {
-        return this.rightSibling;
+        return this.rightSibling ? this.rightSibling.getSubstituteSibling() : this.rightSibling;
     }
 
     protected concatSiblings() {
-        const leftSibling = this.findLeftSibling();
+        const leftSibling = <IBplusLeafNode<T>>this.findLeftSibling();
+
         if (leftSibling != null)
-            (<IBplusLeafNode<T>>leftSibling).rightSibling = this.rightSibling;
+            leftSibling.rightSibling = this.rightSibling;
     }
 
     /**
@@ -47,7 +48,12 @@ export class IBplusLeafNode<T extends FlatInterval> extends IBplusNode<T> {
      * @returns the substitution sibling if exists, null otherwise
      */
     getSubstituteSibling(): IBplusLeafNode<T> {
-        return this.substSibling;
+        let sibling: IBplusLeafNode<T> = this;
+
+        while (sibling.substSibling)
+            sibling = sibling.substSibling;
+
+        return sibling;
     }
 
     exists(int: T): boolean {
@@ -257,6 +263,7 @@ export class IBplusLeafNode<T extends FlatInterval> extends IBplusNode<T> {
         for (let i: number = 0; i < depth; ++i)
             tabs += '\t';
 
+        acc += `${tabs}Leaf:\n`;
         for (let interval of this.children)
             acc += `${tabs}- [${interval.getLowerBound()}, ${interval.getUpperBound()}]\n`;
 
