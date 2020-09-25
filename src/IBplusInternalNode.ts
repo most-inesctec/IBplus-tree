@@ -216,6 +216,16 @@ export class IBplusInternalNode<T extends FlatInterval> extends IBplusNode<T> {
         return res;
     }
 
+    findIntervalWithCompounds(int: Interval<T>): Array<[IBplusLeafNode<T>, number]> {
+        let res: Array<[IBplusLeafNode<T>, number]> = [];
+
+        for (let i = 0; i < this.keys.length; ++i)
+            if (Interval.containsWithValues([int.getLowerBound(), int.getUpperBound()], [this.keys[i], this.maximums[i]]))
+                res.push(...this.children[i].findIntervalWithCompounds(int));
+
+        return res;
+    }
+
     findIntervalsInRange(int: Interval<T> | FlatInterval): Array<[IBplusLeafNode<T>, Interval<T>]> {
         let res: Array<[IBplusLeafNode<T>, Interval<T>]> = [];
 
@@ -233,11 +243,18 @@ export class IBplusInternalNode<T extends FlatInterval> extends IBplusNode<T> {
      * 
      * @param int The interval to be deleted
      */
-    delete(int: Interval<T>): void {
-        let found: [IBplusLeafNode<T>, number] = this.findInterval(int);
+    delete(int: Interval<T>, alpha: number): void {
+        if (alpha) {
+            let found: [IBplusLeafNode<T>, number] = this.findInterval(int);
 
-        if (found != null)
-            found[0].removeChild(found[1]);
+            if (found != null)
+                found[0].removeChild(found[1]);
+        } else {
+            let foundInts: Array<[IBplusLeafNode<T>, number]> = this.findIntervalWithCompounds(int);
+
+            for (let found of foundInts)
+                found[0].removeChild(found[1]);
+        }
     }
 
     /**
