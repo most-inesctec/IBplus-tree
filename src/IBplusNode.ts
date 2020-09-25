@@ -234,12 +234,9 @@ export abstract class IBplusNode<T extends FlatInterval> {
      * 
      * 
      * @param int the interval to be found.
-     * @returns array of Pairs containing the interval and the respective
-     * leaf where it's stored.
-     * 
-     * @param int 
+     * @returns array of tuples containing the leaf, the interval and the index of the interval on the leaf
      */
-    abstract findIntervalWithCompounds(int: Interval<T>): Array<[IBplusLeafNode<T>, number]>;
+    abstract findIntervalWithCompounds(int: Interval<T>): Array<[IBplusLeafNode<T>, Interval<T>, number]>;
 
     /**
      * Finds all the intervals in the tree belonging to the given interval.
