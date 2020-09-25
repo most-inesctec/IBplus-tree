@@ -63,21 +63,26 @@ describe('Bulk testing', () => {
     });
 
     it('Bulk Range Removal with TimeSplits', () => {
-        it('Bulk Range Removal', () => {
-            const tree: IBplusTree<FlatInterval> = new IBplusTree<FlatInterval>(10, 0.2);
-            for (const entry of dataset)
-                tree.insert(entry);
+        const tree: IBplusTree<FlatInterval> = new IBplusTree<FlatInterval>(10, 0.2);
+        for (const entry of dataset)
+            tree.insert(entry);
 
-            const deletedIntervals = tree.containedRangeSearch(50, 150);
-            tree.rangeDelete(50, 150);
-            expect(tree.containedRangeSearch(50, 150).size).to.equal(0);
+        // Interval [181, 188] was divided into [181, 184] and [185, 188]
+        expect(tree.search(181, 188).size).to.be.equal(4);
+        // The compound interval was the one removed
+        tree.delete(new FlatInterval(181, 188));
+        expect(tree.search(181, 188).size).to.be.equal(3);
 
-            for (let int of Array.from(deletedIntervals))
-                tree.insert(int);
-            expect(tree.containedRangeSearch(50, 150).size).to.equal(deletedIntervals.size);
 
-            tree.rangeDelete(-1, 300);
-            expect(tree.allRangeSearch(-1, 300).size).to.equal(0);
-        });
+        const deletedIntervals = tree.containedRangeSearch(50, 150);
+        tree.rangeDelete(50, 150);
+        expect(tree.containedRangeSearch(50, 150).size).to.equal(0);
+
+        for (let int of Array.from(deletedIntervals))
+            tree.insert(int);
+        expect(tree.containedRangeSearch(50, 150).size).to.equal(deletedIntervals.size);
+
+        tree.rangeDelete(-1, 300);
+        expect(tree.allRangeSearch(-1, 300).size).to.equal(0);
     });
 });
